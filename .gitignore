@@ -33,3 +33,6 @@ DerivedData/
 Thumbs.db
 ehthumbs.db
 Icon?
+
+# Ignore local database files
+postgres-data/

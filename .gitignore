@@ -1,0 +1,35 @@
+# macOS
+.DS_Store
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.env
+*.db
+alembic/versions/*.pyc
+*.sqlite3
+
+# iOS / Xcode
+*.xcuserstate
+*.xcuserdata/
+DerivedData/
+*.xcworkspace
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/**
+
+# SwiftPM
+.build/
+.swiftpm/xcode/package.xcworkspace/
+
+# Logs
+*.log
+
+# System
+Thumbs.db
+ehthumbs.db
+Icon?

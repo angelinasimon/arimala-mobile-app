@@ -13,8 +13,15 @@ class ScanIn(BaseModel):
     guests: int = Field(default=0)
     scanned_by: Optional[str] = "unknown"
 
+
 class ScanOut(BaseModel):
     id: UUID
     scanned_at: datetime
     is_valid: bool
     validation_reason: Optional[str] = None
+    guests: int
+    membership_type: Optional[str] = None
+    member_name: Optional[str] = None
+
+    class Config:
+        orm_mode = True

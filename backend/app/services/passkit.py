@@ -4,6 +4,9 @@ from typing import Tuple, Optional
 
 from app.services.passkit_auth import make_passkit_jwt
 
+
+IS_STUB_MODE = os.getenv("ENV", "prod") == "dev"
+
 BASE_URL = os.getenv("PASSKIT_BASE_URL", "https://api.passkit.com")
 
 def passkit_client() -> httpx.Client:
@@ -24,6 +27,9 @@ def validate_pass(pass_id: str) -> Tuple[bool, Optional[str], Optional[dict]]:
     Returns:
         (is_valid, reason_if_invalid, payload_dict_or_none)
     """
+    if IS_STUB_MODE:
+        return True, None, {"passId": pass_id, "status": "ACTIVE", "stub_mode": True}
+
     try:
         with passkit_client() as client:
             response = client.get(f"/pass/{pass_id}")

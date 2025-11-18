@@ -54,3 +54,6 @@ class Scan(Base):
     scanned_by: Mapped[str] = mapped_column(default="unknown")
     scanned_at: Mapped[datetime.datetime] = mapped_column(default=datetime.datetime.utcnow)
     passkit_payload: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+
+
+    

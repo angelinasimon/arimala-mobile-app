@@ -3,18 +3,13 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from collections import defaultdict
 
-from app.db import SessionLocal
+from app.db import SessionLocal, get_db
 from app.models.models import Scan
 from app.schemas.dashboard import EventSummary, MembershipBreakdown
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+
 
 @router.get("/events/{event_id}/summary", response_model=EventSummary)
 def event_summary(event_id: UUID, db: Session = Depends(get_db)):
@@ -29,7 +24,12 @@ def event_summary(event_id: UUID, db: Session = Depends(get_db)):
     breakdown = defaultdict(lambda: {"members": 0, "guests": 0})
 
     for s in scans:
-        member_type = s.passkit_payload.get("member_type", "Unknown") if s.passkit_payload else "Unknown"
+        if s.member and s.member.membership_type:
+            member_type = s.member.membership_type.value
+        elif s.passkit_payload:
+            member_type = s.passkit_payload.get("member_type", "Unknown")
+        else:
+            member_type = "Unknown"
         breakdown[member_type]["members"] += 1
         breakdown[member_type]["guests"] += s.guests
 

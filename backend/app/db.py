@@ -11,9 +11,19 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./arimala_dev.db")
 
 # Create SQLAlchemy engine and session factory
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+    DATABASE_URL, 
+    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 )
+
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 class Base(DeclarativeBase):
     pass
+
+# ✅ Single shared DB dependency for FastAPI + tests
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

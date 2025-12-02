@@ -5,6 +5,8 @@ from sqlalchemy import pool
 
 from alembic import context
 from app.db import DATABASE_URL
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.ext.compiler import compiles
 
 
 # this is the Alembic Config object, which provides
@@ -22,6 +24,9 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from app.models.models import Base
+@compiles(JSONB, "sqlite")
+def compile_jsonb_sqlite(type_, compiler, **kw):
+    return "JSON"
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,

@@ -1,13 +1,17 @@
 import os
 import httpx
+import logging
 from typing import Tuple, Optional
 
 from app.services.passkit_auth import make_passkit_jwt
 
+logger = logging.getLogger(__name__)
 
 IS_STUB_MODE = os.getenv("ENV", "prod") == "dev"
-
 BASE_URL = os.getenv("PASSKIT_BASE_URL", "https://api.passkit.com")
+
+class PasskitValidationError(Exception):
+    pass
 
 def passkit_client() -> httpx.Client:
     jwt = make_passkit_jwt(ttl_seconds=60)
@@ -33,8 +37,8 @@ def validate_pass(pass_id: str) -> Tuple[bool, Optional[str], Optional[dict]]:
     try:
         with passkit_client() as client:
             response = client.get(f"/pass/{pass_id}")
+            response.raise_for_status()
 
-        if response.status_code == 200:
             data = response.json()
             status = data.get("status", "").upper()
 
@@ -45,14 +49,14 @@ def validate_pass(pass_id: str) -> Tuple[bool, Optional[str], Optional[dict]]:
             else:
                 return True, None, data
 
-        elif response.status_code == 404:
-            return False, "Pass not found", None
-
-        else:
-            return False, f"Unexpected PassKit error ({response.status_code})", None
+    except httpx.HTTPStatusError as e:
+        logger.error(f"PassKit HTTP error: {e.response.status_code} - {e.response.text}")
+        raise PasskitValidationError(f"PassKit error: {e.response.status_code}")
 
     except httpx.RequestError as e:
-        return False, f"HTTP error: {e}", None
+        logger.error(f"PassKit network error: {e}")
+        raise PasskitValidationError("Network error during PassKit validation")
 
     except Exception as e:
-        return False, f"Internal validation error: {e}", None
+        logger.exception("Unexpected error during PassKit validation")
+        raise PasskitValidationError("Unexpected internal error during pass validation")

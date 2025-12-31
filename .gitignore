@@ -8,10 +8,14 @@ __pycache__/
 *.pyo
 *.pyd
 .env
+.env.local
+.env.*
 *.env
 *.db
 alembic/versions/*.pyc
 *.sqlite3
+*.dump
+*.sql
 
 # iOS / Xcode
 *.xcuserstate
